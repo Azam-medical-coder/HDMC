@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b6b3a">
+<title>Homoeopathic Disease Mapping Clinic - Dr. Zeeshan</title>
+<style>
+body{font-family:Arial;background:#eaf5ea;padding:15px;margin:0}
+.header{text-align:center;background:#0b6b3a;color:#fff;padding:15px;border-radius:12px}
+.header h1{color:#fff;font-size:22px;margin:5px}
+.card{background:#fff;padding:15px;border-radius:12px;margin:12px 0;box-shadow:0 2px 8px #ccc}
+input,select{width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px}
+button{background:#0b6b3a;color:#fff;padding:13px;border:none;border-radius:8px;width:100%;font-size:16px;margin-top:8px;cursor:pointer}
+button.print{background:#1a5fb4}
+button.install{background:#ff9800;color:#000;font-weight:bold}
+.week{background:#f0f9f0;padding:10px;border-left:4px solid #0b6b3a;margin:8px 0;border-radius:6px}
+#printArea{background:#fff;padding:20px;border-radius:10px}
+@media print{ body *{visibility:hidden} #printArea, #printArea *{visibility:visible} #printArea{position:absolute;left:0;top:0;width:100%} }
+</style>
+</head>
+<body>
+
+<button id="installBtn" class="install">📲 APP INSTALL KAREN - Yahan Click Karen</button>
+
+<div class="header">
+<h1>HOMOEOPATHIC DISEASE MAPPING CLINIC</h1>
+<p>Dr. Muhammad Zeeshan<br>Certified Homoeopathic Consultant - Disease Mapping & Natural Healing<br>NCH Registration No. 139846<br><b>21 DAY HOMEO RESET SYSTEM</b></p>
+</div>
+
+<div class="card">
+<h3>Patient Details</h3>
+<input id="pname" placeholder="Patient Name">
+<input id="page" placeholder="Age">
+<input id="pphone" placeholder="WhatsApp No.">
+<input id="pcity" placeholder="City">
+</div>
+
+<div class="card">
+<h3>Search Disease</h3>
+<input id="search" placeholder="Disease ka naam likhen... e.g. Diabetes" onkeyup="searchDisease()">
+<h3>Select Disease No. (1-160)</h3>
+<select id="disease" onchange="load()"></select>
+<div id="therapy"></div>
+</div>
+
+<div class="card">
+<h3>+ Add New Disease With 21 Day Therapy</h3>
+<input id="nName" placeholder="Disease Name">
+<input id="nW1" placeholder="Week 1 DETOX Medicine - Dose - Days">
+<input id="nW2" placeholder="Week 2 STRENGTH Medicine - Dose - Days">
+<input id="nW3" placeholder="Week 3 TREATMENT Combination - Dose - Days">
+<button onclick="addNew()">Add Disease</button>
+</div>
+
+<button onclick="saveRx()">Save & Generate 21 Day Prescription</button>
+
+<div class="card" id="printArea">
+<h2 style="text-align:center;color:#0b6b3a">HOMOEOPATHIC DISEASE MAPPING CLINIC</h2>
+<p style="text-align:center">Dr. Muhammad Zeeshan | NCH Registration No. 139846<br>21 DAY HOMEO RESET SYSTEM | WhatsApp: 03302040590</p>
+<hr>
+<pre id="out" style="white-space:pre-wrap;font-family:Arial;font-size:15px"></pre>
+<p style="font-size:12px;text-align:center">Safe • Natural • Personalized Homoeopathic Care | Online Consultancy 24/7</p>
+</div>
+
+<button class="print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+<button onclick="shareWhatsApp()">📱 Share on WhatsApp</button>
+
+<script>
+// INSTALL BUTTON LOGIC
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); deferredPrompt=e;
+});
+document.getElementById('installBtn').onclick=()=>{
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{deferredPrompt=null}) }
+  else{ alert('Mobile me Chrome ke 3 dots > Add to Home Screen dabayen. PC me 3 dots > Save and Share > Create Shortcut'); }
+};
+
+// 160 DISEASES - Pura data pehle wali file se same hai, yahan paste karen
+// Neeche wali line me apne purane base array ko copy karen
+let base=[
+ {no:1,name:"Acidity / Gastritis",w1:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w2:"Carbo Veg 30 - 2 drops 2x daily, 7 days",w3:"Nux Vomica 30 + Robinia 30 - 2 drops 2x daily, 7 days"},
+ {no:2,name:"Constipation",w1:"Bryonia 30 - 2 drops 2x daily, 7 days",w2:"Alumina 30 - 2 drops 2x daily, 7 days",w3:"Bryonia 30 + Cascara Q 10 drops 2x daily, 7 days"},
+ {no:3,name:"Migraine",w1:"Belladonna 30 - 2 drops SOS, 7 days",w2:"Gelsemium 30 - 2 drops 2x daily, 7 days",w3:"Belladonna 30 + Sanguinaria 30 - 2 drops 2x daily, 7 days"},
+ {no:4,name:"Allergy / Sneezing",w1:"Allium Cepa 30 - 2 drops 3x daily, 7 days",w2:"Sabadilla 30 - 2 drops 2x daily, 7 days",w3:"Allium Cepa + Arsenic Album 30 - 2 drops 2x daily, 7 days"},
+ {no:5,name:"Joint Pain / Arthritis",w1:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w2:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w3:"Rhus Tox 30 + Causticum 30 - 2 drops 2x daily, 7 days"},
+ {no:6,name:"Diabetes Support",w1:"Syzygium Q - 10 drops 2x daily, 7 days",w2:"Cephalandra Q - 10 drops 2x daily, 7 days",w3:"Syzygium Q + Gymnema Q - 10 drops 2x daily, 7 days"},
+ {no:7,name:"High BP",w1:"Rauwolfia Q - 10 drops 2x daily, 7 days",w2:"Crataegus Q - 10 drops 2x daily, 7 days",w3:"Rauwolfia Q + Belladonna 30 - 2 drops 2x daily, 7 days"},
+ {no:8,name:"Eczema / Skin",w1:"Sulphur 30 - 2 drops 1x daily, 7 days",w2:"Graphites 30 - 2 drops 2x daily, 7 days",w3:"Sulphur 30 + Psorinum 30 - 2 drops 1x daily, 7 days"},
+ {no:9,name:"Cough / Cold",w1:"Arsenic Album 30 - 2 drops 3x daily, 7 days",w2:"Antim Tart 30 - 2 drops 2x daily, 7 days",w3:"Arsenic Album + Bryonia 30 - 2 drops 2x daily, 7 days"},
+ {no:10,name:"Anxiety / Stress",w1:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w2:"Kali Phos 6X - 4 tabs 2x daily, 7 days",w3:"Argentum Nit + Passiflora Q - 10 drops 2x daily, 7 days"}
+ // Yahan se 11 se 160 tak purana wala data paste kar den jo maine pichli baar bheja tha
+];
+let saved=JSON.parse(localStorage.getItem('resetDiseases')||'[]');
+let all=base.concat(saved);
+function render(){ let s=document.getElementById('disease'); s.innerHTML=''; all.forEach(d=>{let o=document.createElement('option'); o.text=d.no+'. '+d.name; o.value=d.no; s.appendChild(o)}); load(); }
+function searchDisease(){ let q=document.getElementById('search').value.toLowerCase(); let s=document.getElementById('disease'); s.innerHTML=''; let f=all.filter(d=>d.name.toLowerCase().includes(q)); if(f.length==0) f=all; f.forEach(d=>{let o=document.createElement('option'); o.text=d.no+'. '+d.name; o.value=d.no; s.appendChild(o)}); load(); }
+function load(){ let v=document.getElementById('disease').value; let d=all.find(x=>x.no==v); if(!d) return; document.getElementById('therapy').innerHTML=`<div class="week"><b>WEEK 1 DETOX (Day 1-7)</b><br>${d.w1}</div><div class="week"><b>WEEK 2 STRENGTH (Day 8-14)</b><br>${d.w2}</div><div class="week"><b>WEEK 3 TREATMENT (Day 15-21)</b><br>${d.w3}</div>`; }
+function addNew(){ let n=document.getElementById('nName').value; let w1=document.getElementById('nW1').value; let w2=document.getElementById('nW2').value; let w3=document.getElementById('nW3').value; if(!n||!w1) return alert('Disease aur Week 1 zaroor likhen'); let obj={no:all.length+1,name:n,w1:w1,w2:w2,w3:w3}; saved.push(obj); localStorage.setItem('resetDiseases',JSON.stringify(saved)); all.push(obj); render(); alert('Added No. '+obj.no); }
+let lastTxt='';
+function saveRx(){ let name=document.getElementById('pname').value||'Patient'; let age=document.getElementById('page').value||''; let phone=document.getElementById('pphone').value||''; let city=document.getElementById('pcity').value||''; let v=document.getElementById('disease').value; let d=all.find(x=>x.no==v); lastTxt=`Patient: ${name} | Age: ${age} | WhatsApp: ${phone} | City: ${city}\nDate: ${new Date().toLocaleDateString()}\nDisease No. ${d.no} - ${d.name}\n\nWEEK 1 DETOX (Day 1-7): ${d.w1}\nWEEK 2 STRENGTH (Day 8-14): ${d.w2}\nWEEK 3 TREATMENT (Day 15-21): ${d.w3}\n\n21 DAY HOMEO RESET SYSTEM\nDr. Muhammad Zeeshan | NCH 139846`; document.getElementById('out').innerText=lastTxt; alert('Saved! Ab Print / PDF dabayen'); }
+function shareWhatsApp(){ if(!lastTxt) return alert('Pehle Prescription Generate karen'); window.open('https://wa.me/?text='+encodeURIComponent(lastTxt),'_blank'); }
+render();
+</script>
+</body>
+</html>
