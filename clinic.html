@@ -14,21 +14,16 @@ body{font-family:Arial;background:#eaf5ea;padding:15px;margin:0}
 input,select{width:100%;padding:11px;margin:6px 0;border:1px solid #ccc;border-radius:8px}
 button{background:#0b6b3a;color:#fff;padding:13px;border:none;border-radius:8px;width:100%;font-size:16px;margin-top:8px;cursor:pointer}
 button.print{background:#1a5fb4}
-button.install{background:#ff9800;color:#000;font-weight:bold}
 .week{background:#f0f9f0;padding:10px;border-left:4px solid #0b6b3a;margin:8px 0;border-radius:6px}
 #printArea{background:#fff;padding:20px;border-radius:10px}
 @media print{ body *{visibility:hidden} #printArea, #printArea *{visibility:visible} #printArea{position:absolute;left:0;top:0;width:100%} }
 </style>
 </head>
 <body>
-
-<button id="installBtn" class="install">📲 APP INSTALL KAREN - Yahan Click Karen</button>
-
 <div class="header">
 <h1>HOMOEOPATHIC DISEASE MAPPING CLINIC</h1>
 <p>Dr. Muhammad Zeeshan<br>Certified Homoeopathic Consultant - Disease Mapping & Natural Healing<br>NCH Registration No. 139846<br><b>21 DAY HOMEO RESET SYSTEM</b></p>
 </div>
-
 <div class="card">
 <h3>Patient Details</h3>
 <input id="pname" placeholder="Patient Name">
@@ -36,7 +31,6 @@ button.install{background:#ff9800;color:#000;font-weight:bold}
 <input id="pphone" placeholder="WhatsApp No.">
 <input id="pcity" placeholder="City">
 </div>
-
 <div class="card">
 <h3>Search Disease</h3>
 <input id="search" placeholder="Disease ka naam likhen... e.g. Diabetes" onkeyup="searchDisease()">
@@ -44,7 +38,6 @@ button.install{background:#ff9800;color:#000;font-weight:bold}
 <select id="disease" onchange="load()"></select>
 <div id="therapy"></div>
 </div>
-
 <div class="card">
 <h3>+ Add New Disease With 21 Day Therapy</h3>
 <input id="nName" placeholder="Disease Name">
@@ -53,9 +46,7 @@ button.install{background:#ff9800;color:#000;font-weight:bold}
 <input id="nW3" placeholder="Week 3 TREATMENT Combination - Dose - Days">
 <button onclick="addNew()">Add Disease</button>
 </div>
-
 <button onclick="saveRx()">Save & Generate 21 Day Prescription</button>
-
 <div class="card" id="printArea">
 <h2 style="text-align:center;color:#0b6b3a">HOMOEOPATHIC DISEASE MAPPING CLINIC</h2>
 <p style="text-align:center">Dr. Muhammad Zeeshan | NCH Registration No. 139846<br>21 DAY HOMEO RESET SYSTEM | WhatsApp: 03302040590</p>
@@ -63,35 +54,170 @@ button.install{background:#ff9800;color:#000;font-weight:bold}
 <pre id="out" style="white-space:pre-wrap;font-family:Arial;font-size:15px"></pre>
 <p style="font-size:12px;text-align:center">Safe • Natural • Personalized Homoeopathic Care | Online Consultancy 24/7</p>
 </div>
-
 <button class="print" onclick="window.print()">🖨️ Print / Save as PDF</button>
 <button onclick="shareWhatsApp()">📱 Share on WhatsApp</button>
-
 <script>
-// INSTALL BUTTON LOGIC
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e)=>{
-  e.preventDefault(); deferredPrompt=e;
-});
-document.getElementById('installBtn').onclick=()=>{
-  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{deferredPrompt=null}) }
-  else{ alert('Mobile me Chrome ke 3 dots > Add to Home Screen dabayen. PC me 3 dots > Save and Share > Create Shortcut'); }
-};
-
-// 160 DISEASES - Pura data pehle wali file se same hai, yahan paste karen
-// Neeche wali line me apne purane base array ko copy karen
 let base=[
- {no:1,name:"Acidity / Gastritis",w1:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w2:"Carbo Veg 30 - 2 drops 2x daily, 7 days",w3:"Nux Vomica 30 + Robinia 30 - 2 drops 2x daily, 7 days"},
- {no:2,name:"Constipation",w1:"Bryonia 30 - 2 drops 2x daily, 7 days",w2:"Alumina 30 - 2 drops 2x daily, 7 days",w3:"Bryonia 30 + Cascara Q 10 drops 2x daily, 7 days"},
- {no:3,name:"Migraine",w1:"Belladonna 30 - 2 drops SOS, 7 days",w2:"Gelsemium 30 - 2 drops 2x daily, 7 days",w3:"Belladonna 30 + Sanguinaria 30 - 2 drops 2x daily, 7 days"},
- {no:4,name:"Allergy / Sneezing",w1:"Allium Cepa 30 - 2 drops 3x daily, 7 days",w2:"Sabadilla 30 - 2 drops 2x daily, 7 days",w3:"Allium Cepa + Arsenic Album 30 - 2 drops 2x daily, 7 days"},
- {no:5,name:"Joint Pain / Arthritis",w1:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w2:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w3:"Rhus Tox 30 + Causticum 30 - 2 drops 2x daily, 7 days"},
- {no:6,name:"Diabetes Support",w1:"Syzygium Q - 10 drops 2x daily, 7 days",w2:"Cephalandra Q - 10 drops 2x daily, 7 days",w3:"Syzygium Q + Gymnema Q - 10 drops 2x daily, 7 days"},
- {no:7,name:"High BP",w1:"Rauwolfia Q - 10 drops 2x daily, 7 days",w2:"Crataegus Q - 10 drops 2x daily, 7 days",w3:"Rauwolfia Q + Belladonna 30 - 2 drops 2x daily, 7 days"},
- {no:8,name:"Eczema / Skin",w1:"Sulphur 30 - 2 drops 1x daily, 7 days",w2:"Graphites 30 - 2 drops 2x daily, 7 days",w3:"Sulphur 30 + Psorinum 30 - 2 drops 1x daily, 7 days"},
- {no:9,name:"Cough / Cold",w1:"Arsenic Album 30 - 2 drops 3x daily, 7 days",w2:"Antim Tart 30 - 2 drops 2x daily, 7 days",w3:"Arsenic Album + Bryonia 30 - 2 drops 2x daily, 7 days"},
- {no:10,name:"Anxiety / Stress",w1:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w2:"Kali Phos 6X - 4 tabs 2x daily, 7 days",w3:"Argentum Nit + Passiflora Q - 10 drops 2x daily, 7 days"}
- // Yahan se 11 se 160 tak purana wala data paste kar den jo maine pichli baar bheja tha
+{no:1,name:"Acidity / Gastritis",w1:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w2:"Carbo Veg 30 - 2 drops 2x daily, 7 days",w3:"Nux Vomica 30 + Robinia 30 - 2 drops 2x daily, 7 days"},
+{no:2,name:"Constipation",w1:"Bryonia 30 - 2 drops 2x daily, 7 days",w2:"Alumina 30 - 2 drops 2x daily, 7 days",w3:"Bryonia 30 + Cascara Q - 10 drops 2x daily, 7 days"},
+{no:3,name:"Migraine",w1:"Belladonna 30 - 2 drops SOS, 7 days",w2:"Gelsemium 30 - 2 drops 2x daily, 7 days",w3:"Belladonna 30 + Sanguinaria 30 - 2 drops 2x daily, 7 days"},
+{no:4,name:"Allergy / Sneezing",w1:"Allium Cepa 30 - 2 drops 3x daily, 7 days",w2:"Sabadilla 30 - 2 drops 2x daily, 7 days",w3:"Allium Cepa + Arsenic Album 30 - 2 drops 2x daily, 7 days"},
+{no:5,name:"Joint Pain / Arthritis",w1:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w2:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w3:"Rhus Tox 30 + Causticum 30 - 2 drops 2x daily, 7 days"},
+{no:6,name:"Diabetes Support",w1:"Syzygium Q - 10 drops 2x daily, 7 days",w2:"Cephalandra Q - 10 drops 2x daily, 7 days",w3:"Syzygium Q + Gymnema Q - 10 drops 2x daily, 7 days"},
+{no:7,name:"High BP",w1:"Rauwolfia Q - 10 drops 2x daily, 7 days",w2:"Crataegus Q - 10 drops 2x daily, 7 days",w3:"Rauwolfia Q + Belladonna 30 - 2 drops 2x daily, 7 days"},
+{no:8,name:"Eczema / Skin",w1:"Sulphur 30 - 2 drops 1x daily, 7 days",w2:"Graphites 30 - 2 drops 2x daily, 7 days",w3:"Sulphur 30 + Psorinum 30 - 2 drops 1x daily, 7 days"},
+{no:9,name:"Cough / Cold",w1:"Arsenic Album 30 - 2 drops 3x daily, 7 days",w2:"Antim Tart 30 - 2 drops 2x daily, 7 days",w3:"Arsenic Album + Bryonia 30 - 2 drops 2x daily, 7 days"},
+{no:10,name:"Anxiety / Stress",w1:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w2:"Kali Phos 6X - 4 tabs 2x daily, 7 days",w3:"Argentum Nit + Passiflora Q - 10 drops 2x daily, 7 days"},
+{no:11,name:"Acne / Pimples",w1:"Sulphur 30 - 2 drops 1x daily, 7 days",w2:"Berberis Aquifolium Q - 10 drops 2x daily, 7 days",w3:"Sulphur + Kali Bromatum 30 - 2 drops 2x daily, 7 days"},
+{no:12,name:"Hair Fall",w1:"Acid Phos 30 - 2 drops 2x daily, 7 days",w2:"Wiesbaden 30 - 2 drops 1x daily, 7 days",w3:"Acid Phos + Arnica Q - 10 drops 2x daily, 7 days"},
+{no:13,name:"Asthma",w1:"Arsenic Album 30 - 2 drops 2x daily, 7 days",w2:"Blatta Orientalis Q - 10 drops 2x daily, 7 days",w3:"Arsenic + Ipecac 30 - 2 drops 2x daily, 7 days"},
+{no:14,name:"Sinusitis",w1:"Kali Bichromicum 30 - 2 drops 2x daily, 7 days",w2:"Silicea 30 - 2 drops 2x daily, 7 days",w3:"Kali Bich + Hydrastis Q - 10 drops 2x daily, 7 days"},
+{no:15,name:"Tonsillitis",w1:"Belladonna 30 - 2 drops 3x daily, 7 days",w2:"Baryta Carb 30 - 2 drops 2x daily, 7 days",w3:"Belladonna + Merc Sol 30 - 2 drops 2x daily, 7 days"},
+{no:16,name:"Back Pain",w1:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w2:"Bryonia 30 - 2 drops 2x daily, 7 days",w3:"Rhus Tox + Calc Fluor 6X - 4 tabs 2x daily, 7 days"},
+{no:17,name:"Knee Pain",w1:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w2:"Ruta 30 - 2 drops 2x daily, 7 days",w3:"Calc Phos + Symphytum 30 - 2 drops 2x daily, 7 days"},
+{no:18,name:"Sciatica",w1:"Colocynth 30 - 2 drops 2x daily, 7 days",w2:"Gnaphalium Q - 10 drops 2x daily, 7 days",w3:"Colocynth + Mag Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:19,name:"Cervical Spondylosis",w1:"Cimicifuga 30 - 2 drops 2x daily, 7 days",w2:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w3:"Cimicifuga + Kalmia 30 - 2 drops 2x daily, 7 days"},
+{no:20,name:"Frozen Shoulder",w1:"Ferrum Met 30 - 2 drops 2x daily, 7 days",w2:"Sanguinaria 30 - 2 drops 2x daily, 7 days",w3:"Ferrum Met + Rhus Tox 30 - 2 drops 2x daily, 7 days"},
+{no:21,name:"Insomnia / Sleeplessness",w1:"Passiflora Q - 10 drops at night, 7 days",w2:"Coffea Cruda 30 - 2 drops at night, 7 days",w3:"Passiflora Q + Kali Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:22,name:"Depression",w1:"Ignatia 30 - 2 drops 2x daily, 7 days",w2:"Natrum Mur 30 - 2 drops 2x daily, 7 days",w3:"Ignatia + Aurum Met 30 - 2 drops 1x daily, 7 days"},
+{no:23,name:"Memory Weakness",w1:"Anacardium 30 - 2 drops 2x daily, 7 days",w2:"Kali Phos 6X - 4 tabs 2x daily, 7 days",w3:"Anacardium + Baryta Carb 30 - 2 drops 2x daily, 7 days"},
+{no:24,name:"Headache",w1:"Belladonna 30 - 2 drops 2x daily, 7 days",w2:"Gelsemium 30 - 2 drops 2x daily, 7 days",w3:"Belladonna + Glonoinum 30 - 2 drops 2x daily, 7 days"},
+{no:25,name:"Vertigo / Dizziness",w1:"Conium 30 - 2 drops 2x daily, 7 days",w2:"Cocculus 30 - 2 drops 2x daily, 7 days",w3:"Conium + Gelsemium 30 - 2 drops 2x daily, 7 days"},
+{no:26,name:"High Cholesterol",w1:"Cholesterinum 3X - 2 drops 2x daily, 7 days",w2:"Calc Carb 30 - 2 drops 1x daily, 7 days",w3:"Cholesterinum + Allium Sativum Q - 10 drops 2x daily, 7 days"},
+{no:27,name:"Low BP",w1:"Gelsemium 30 - 2 drops 2x daily, 7 days",w2:"Crataegus Q - 10 drops 2x daily, 7 days",w3:"Gelsemium + China 30 - 2 drops 2x daily, 7 days"},
+{no:28,name:"Heart Palpitation",w1:"Crataegus Q - 10 drops 2x daily, 7 days",w2:"Cactus Q - 10 drops 2x daily, 7 days",w3:"Crataegus + Digitalis 30 - 2 drops 2x daily, 7 days"},
+{no:29,name:"Varicose Veins",w1:"Hamamelis Q - 10 drops 2x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Hamamelis + Calc Fluor 6X - 4 tabs 2x daily, 7 days"},
+{no:30,name:"Piles / Hemorrhoids",w1:"Aesculus Q - 10 drops 2x daily, 7 days",w2:"Collinsonia 30 - 2 drops 2x daily, 7 days",w3:"Aesculus + Ratanhia 30 - 2 drops 2x daily, 7 days"},
+{no:31,name:"Fissure",w1:"Ratanhia 30 - 2 drops 2x daily, 7 days",w2:"Graphites 30 - 2 drops 2x daily, 7 days",w3:"Ratanhia + Paeonia 30 - 2 drops 2x daily, 7 days"},
+{no:32,name:"Fistula",w1:"Silicea 30 - 2 drops 2x daily, 7 days",w2:"Myristica 30 - 2 drops 2x daily, 7 days",w3:"Silicea + Calc Sulph 6X - 4 tabs 2x daily, 7 days"},
+{no:33,name:"IBS / Irritable Bowel",w1:"Colocynth 30 - 2 drops 2x daily, 7 days",w2:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w3:"Colocynth + Nux Vomica 30 - 2 drops 2x daily, 7 days"},
+{no:34,name:"Diarrhea",w1:"Arsenic Album 30 - 2 drops 3x daily, 7 days",w2:"Podophyllum 30 - 2 drops 2x daily, 7 days",w3:"Arsenic + Veratrum Album 30 - 2 drops 2x daily, 7 days"},
+{no:35,name:"Ulcer",w1:"Arsenic Album 30 - 2 drops 2x daily, 7 days",w2:"Kali Bich 30 - 2 drops 2x daily, 7 days",w3:"Arsenic + Robinia 30 - 2 drops 2x daily, 7 days"},
+{no:36,name:"Liver Problem / Fatty Liver",w1:"Chelidonium Q - 10 drops 2x daily, 7 days",w2:"Carduus Marianus Q - 10 drops 2x daily, 7 days",w3:"Chelidonium + Lycopodium 30 - 2 drops 2x daily, 7 days"},
+{no:37,name:"Jaundice",w1:"Chelidonium 30 - 2 drops 2x daily, 7 days",w2:"China 30 - 2 drops 2x daily, 7 days",w3:"Chelidonium + Natrum Sulph 6X - 4 tabs 2x daily, 7 days"},
+{no:38,name:"Gall Stone",w1:"Chelidonium Q - 10 drops 2x daily, 7 days",w2:"Berberis Vulgaris Q - 10 drops 2x daily, 7 days",w3:"Chelidonium + Calc Carb 30 - 2 drops 1x daily, 7 days"},
+{no:39,name:"Kidney Stone",w1:"Berberis Vulgaris Q - 10 drops 2x daily, 7 days",w2:"Sarsaparilla 30 - 2 drops 2x daily, 7 days",w3:"Berberis + Lycopodium 30 - 2 drops 2x daily, 7 days"},
+{no:40,name:"UTI / Urine Infection",w1:"Cantharis 30 - 2 drops 3x daily, 7 days",w2:"Berberis Vulgaris Q - 10 drops 2x daily, 7 days",w3:"Cantharis + Apis Mel 30 - 2 drops 2x daily, 7 days"},
+{no:41,name:"Prostate Enlarged",w1:"Sabal Serrulata Q - 10 drops 2x daily, 7 days",w2:"Chimaphila Q - 10 drops 2x daily, 7 days",w3:"Sabal + Conium 30 - 2 drops 2x daily, 7 days"},
+{no:42,name:"Frequent Urination",w1:"Causticum 30 - 2 drops 2x daily, 7 days",w2:"Equisetum Q - 10 drops 2x daily, 7 days",w3:"Causticum + Cantharis 30 - 2 drops 2x daily, 7 days"},
+{no:43,name:"Bed Wetting",w1:"Causticum 30 - 2 drops 1x daily, 7 days",w2:"Equisetum 30 - 2 drops 2x daily, 7 days",w3:"Causticum + Kreosotum 30 - 2 drops 1x daily, 7 days"},
+{no:44,name:"Thyroid - Hypo",w1:"Calc Carb 30 - 2 drops 1x daily, 7 days",w2:"Thyroidinum 30 - 2 drops 2x daily, 7 days",w3:"Calc Carb + Fucus Q - 10 drops 2x daily, 7 days"},
+{no:45,name:"Thyroid - Hyper",w1:"Iodum 30 - 2 drops 2x daily, 7 days",w2:"Natrum Mur 30 - 2 drops 2x daily, 7 days",w3:"Iodum + Lycopus Q - 10 drops 2x daily, 7 days"},
+{no:46,name:"PCOS / Irregular Periods",w1:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w2:"Sepia 30 - 2 drops 1x daily, 7 days",w3:"Pulsatilla + Oophorinum 30 - 2 drops 1x daily, 7 days"},
+{no:47,name:"Infertility Female",w1:"Sepia 30 - 2 drops 1x daily, 7 days",w2:"Borax 30 - 2 drops 2x daily, 7 days",w3:"Sepia + Natrum Mur 30 - 2 drops 2x daily, 7 days"},
+{no:48,name:"Infertility Male",w1:"Selenium 30 - 2 drops 2x daily, 7 days",w2:"Agnus Castus Q - 10 drops 2x daily, 7 days",w3:"Selenium + Damiana Q - 10 drops 2x daily, 7 days"},
+{no:49,name:"Leucorrhea",w1:"Sepia 30 - 2 drops 1x daily, 7 days",w2:"Alumina 30 - 2 drops 2x daily, 7 days",w3:"Sepia + Kreosotum 30 - 2 drops 1x daily, 7 days"},
+{no:50,name:"Menopause Problems",w1:"Lachesis 30 - 2 drops 2x daily, 7 days",w2:"Sepia 30 - 2 drops 1x daily, 7 days",w3:"Lachesis + Sulphur 30 - 2 drops 1x daily, 7 days"},
+{no:51,name:"Weakness / Fatigue",w1:"China 30 - 2 drops 2x daily, 7 days",w2:"Acid Phos 30 - 2 drops 2x daily, 7 days",w3:"China + Avena Sativa Q - 10 drops 2x daily, 7 days"},
+{no:52,name:"Anemia",w1:"Ferrum Met 30 - 2 drops 2x daily, 7 days",w2:"China 30 - 2 drops 2x daily, 7 days",w3:"Ferrum Met + Ferrum Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:53,name:"Obesity / Weight Gain",w1:"Phytolacca Q - 10 drops 2x daily, 7 days",w2:"Calc Carb 30 - 2 drops 1x daily, 7 days",w3:"Phytolacca + Fucus Q - 10 drops 2x daily, 7 days"},
+{no:54,name:"Weight Loss / Thinness",w1:"Alfalfa Q - 10 drops 2x daily, 7 days",w2:"China 30 - 2 drops 2x daily, 7 days",w3:"Alfalfa + Calc Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:55,name:"Psoriasis",w1:"Arsenic Album 30 - 2 drops 2x daily, 7 days",w2:"Graphites 30 - 2 drops 2x daily, 7 days",w3:"Arsenic + Sulphur 30 - 2 drops 1x daily, 7 days"},
+{no:56,name:"Vitiligo / White Spots",w1:"Arsenic Sulph Flavum 3X - 2 drops 2x daily, 7 days",w2:"Hydrocotyle Q - 10 drops 2x daily, 7 days",w3:"Arsenic Sulph + Psoralea Q - 10 drops 2x daily, 7 days"},
+{no:57,name:"Ringworm / Fungal",w1:"Tellurium 30 - 2 drops 2x daily, 7 days",w2:"Sepia 30 - 2 drops 1x daily, 7 days",w3:"Tellurium + Chrysarobinum 30 - 2 drops 2x daily, 7 days"},
+{no:58,name:"Itching",w1:"Sulphur 30 - 2 drops 1x daily, 7 days",w2:"Dolichos Q - 10 drops 2x daily, 7 days",w3:"Sulphur + Rhus Tox 30 - 2 drops 2x daily, 7 days"},
+{no:59,name:"Urticaria / Allergy Rash",w1:"Apis Mel 30 - 2 drops 3x daily, 7 days",w2:"Urtica Urens Q - 10 drops 2x daily, 7 days",w3:"Apis + Rhus Tox 30 - 2 drops 2x daily, 7 days"},
+{no:60,name:"Warts",w1:"Thuja 30 - 2 drops 2x daily, 7 days",w2:"Causticum 30 - 2 drops 2x daily, 7 days",w3:"Thuja + Nitric Acid 30 - 2 drops 2x daily, 7 days"},
+{no:61,name:"Boils / Abscess",w1:"Hepar Sulph 30 - 2 drops 2x daily, 7 days",w2:"Silicea 30 - 2 drops 2x daily, 7 days",w3:"Hepar Sulph + Myristica 30 - 2 drops 2x daily, 7 days"},
+{no:62,name:"Mouth Ulcers",w1:"Borax 30 - 2 drops 2x daily, 7 days",w2:"Merc Sol 30 - 2 drops 2x daily, 7 days",w3:"Borax + Nitric Acid 30 - 2 drops 2x daily, 7 days"},
+{no:63,name:"Tooth Pain",w1:"Plantago Q - 10 drops 2x daily, 7 days",w2:"Chamomilla 30 - 2 drops 2x daily, 7 days",w3:"Plantago + Coffea 30 - 2 drops 2x daily, 7 days"},
+{no:64,name:"Gum Bleeding",w1:"Merc Sol 30 - 2 drops 2x daily, 7 days",w2:"Phosphorus 30 - 2 drops 1x daily, 7 days",w3:"Merc Sol + Kreosotum 30 - 2 drops 1x daily, 7 days"},
+{no:65,name:"Eye Weakness",w1:"Euphrasia 30 - 2 drops 2x daily, 7 days",w2:"Ruta 30 - 2 drops 2x daily, 7 days",w3:"Euphrasia + Calc Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:66,name:"Conjunctivitis",w1:"Euphrasia 30 - 2 drops 3x daily, 7 days",w2:"Apis Mel 30 - 2 drops 2x daily, 7 days",w3:"Euphrasia + Argentum Nit 30 - 2 drops 2x daily, 7 days"},
+{no:67,name:"Ear Pain / Infection",w1:"Belladonna 30 - 2 drops 3x daily, 7 days",w2:"Hepar Sulph 30 - 2 drops 2x daily, 7 days",w3:"Belladonna + Pulsatilla 30 - 2 drops 2x daily, 7 days"},
+{no:68,name:"Hearing Loss",w1:"Calc Carb 30 - 2 drops 1x daily, 7 days",w2:"Chenopodium 30 - 2 drops 2x daily, 7 days",w3:"Calc Carb + Kali Mur 6X - 4 tabs 2x daily, 7 days"},
+{no:69,name:"Nose Bleed",w1:"Phosphorus 30 - 2 drops 2x daily, 7 days",w2:"Hamamelis Q - 10 drops 2x daily, 7 days",w3:"Phosphorus + Ferrum Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:70,name:"Bronchitis",w1:"Antim Tart 30 - 2 drops 2x daily, 7 days",w2:"Bryonia 30 - 2 drops 2x daily, 7 days",w3:"Antim Tart + Senega Q - 10 drops 2x daily, 7 days"},
+{no:71,name:"Pneumonia Support",w1:"Bryonia 30 - 2 drops 2x daily, 7 days",w2:"Phosphorus 30 - 2 drops 2x daily, 7 days",w3:"Bryonia + Antim Tart 30 - 2 drops 2x daily, 7 days"},
+{no:72,name:"Tuberculosis Support",w1:"Tuberculinum 200 - 1 dose weekly, 7 days",w2:"Phosphorus 30 - 2 drops 2x daily, 7 days",w3:"Tuberculinum + Calc Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:73,name:"Fever",w1:"Belladonna 30 - 2 drops 3x daily, 7 days",w2:"Ferrum Phos 6X - 4 tabs 2x daily, 7 days",w3:"Belladonna + Aconite 30 - 2 drops 3x daily, 7 days"},
+{no:74,name:"Dengue Support",w1:"Eupatorium 30 - 2 drops 2x daily, 7 days",w2:"China 30 - 2 drops 2x daily, 7 days",w3:"Eupatorium + Rhus Tox 30 - 2 drops 2x daily, 7 days"},
+{no:75,name:"Typhoid Support",w1:"Baptisia Q - 10 drops 2x daily, 7 days",w2:"Arsenic Album 30 - 2 drops 2x daily, 7 days",w3:"Baptisia + China 30 - 2 drops 2x daily, 7 days"},
+{no:76,name:"Malaria Support",w1:"China 30 - 2 drops 2x daily, 7 days",w2:"Natrum Mur 30 - 2 drops 2x daily, 7 days",w3:"China + Eupatorium 30 - 2 drops 2x daily, 7 days"},
+{no:77,name:"Chicken Pox",w1:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w2:"Variolinum 30 - 2 drops 1x daily, 7 days",w3:"Rhus Tox + Antim Tart 30 - 2 drops 2x daily, 7 days"},
+{no:78,name:"Measles",w1:"Morbillinum 30 - 2 drops 1x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Morbillinum + Euphrasia 30 - 2 drops 2x daily, 7 days"},
+{no:79,name:"Mumps",w1:"Parotidinum 30 - 2 drops 2x daily, 7 days",w2:"Belladonna 30 - 2 drops 2x daily, 7 days",w3:"Parotidinum + Jaborandi Q - 10 drops 2x daily, 7 days"},
+{no:80,name:"Jaundice Children",w1:"Chelidonium 30 - 2 drops 2x daily, 7 days",w2:"China 30 - 2 drops 2x daily, 7 days",w3:"Chelidonium + Carduus Marianus Q - 10 drops 2x daily, 7 days"},
+{no:81,name:"Worms",w1:"Cina 30 - 2 drops 2x daily, 7 days",w2:"Teucrium 30 - 2 drops 2x daily, 7 days",w3:"Cina + Santoninum 30 - 2 drops 2x daily, 7 days"},
+{no:82,name:"Bed Wetting Child",w1:"Causticum 30 - 2 drops 1x daily, 7 days",w2:"Equisetum 30 - 2 drops 2x daily, 7 days",w3:"Causticum + Belladonna 30 - 2 drops 1x daily, 7 days"},
+{no:83,name:"Teething Problems",w1:"Chamomilla 30 - 2 drops 2x daily, 7 days",w2:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w3:"Chamomilla + Belladonna 30 - 2 drops 2x daily, 7 days"},
+{no:84,name:"Child Weakness",w1:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w2:"Alfalfa Q - 10 drops 2x daily, 7 days",w3:"Calc Phos + China 30 - 2 drops 2x daily, 7 days"},
+{no:85,name:"Hyperactivity Child",w1:"Chamomilla 30 - 2 drops 2x daily, 7 days",w2:"Cina 30 - 2 drops 2x daily, 7 days",w3:"Chamomilla + Tuberculinum 30 - 2 drops 1x daily, 7 days"},
+{no:86,name:"Stammering",w1:"Stramonium 30 - 2 drops 2x daily, 7 days",w2:"Causticum 30 - 2 drops 2x daily, 7 days",w3:"Stramonium + Bovista 30 - 2 drops 2x daily, 7 days"},
+{no:87,name:"Epilepsy Support",w1:"Bufo Rana 30 - 2 drops 2x daily, 7 days",w2:"Cuprum Met 30 - 2 drops 2x daily, 7 days",w3:"Bufo + Cicuta 30 - 2 drops 2x daily, 7 days"},
+{no:88,name:"Paralysis Support",w1:"Causticum 30 - 2 drops 2x daily, 7 days",w2:"Plumbum Met 30 - 2 drops 2x daily, 7 days",w3:"Causticum + Gelsemium 30 - 2 drops 2x daily, 7 days"},
+{no:89,name:"Parkinson Support",w1:"Gelsemium 30 - 2 drops 2x daily, 7 days",w2:"Agaricus 30 - 2 drops 2x daily, 7 days",w3:"Gelsemium + Zinc Met 30 - 2 drops 2x daily, 7 days"},
+{no:90,name:"Alzheimer Support",w1:"Baryta Carb 30 - 2 drops 2x daily, 7 days",w2:"Anacardium 30 - 2 drops 2x daily, 7 days",w3:"Baryta Carb + Kali Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:91,name:"Bells Palsy",w1:"Causticum 30 - 2 drops 2x daily, 7 days",w2:"Aconite 30 - 2 drops 2x daily, 7 days",w3:"Causticum + Belladonna 30 - 2 drops 2x daily, 7 days"},
+{no:92,name:"Numbness Hands Feet",w1:"Hypericum 30 - 2 drops 2x daily, 7 days",w2:"Phosphorus 30 - 2 drops 1x daily, 7 days",w3:"Hypericum + Calc Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:93,name:"Gout / Uric Acid",w1:"Colchicum 30 - 2 drops 2x daily, 7 days",w2:"Urtica Urens Q - 10 drops 2x daily, 7 days",w3:"Colchicum + Benzoic Acid 30 - 2 drops 2x daily, 7 days"},
+{no:94,name:"Rheumatoid Arthritis",w1:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w2:"Causticum 30 - 2 drops 2x daily, 7 days",w3:"Rhus Tox + Actea Spicata 30 - 2 drops 2x daily, 7 days"},
+{no:95,name:"Osteoporosis",w1:"Calc Phos 6X - 4 tabs 2x daily, 7 days",w2:"Silicea 30 - 2 drops 2x daily, 7 days",w3:"Calc Phos + Calc Fluor 6X - 4 tabs 2x daily, 7 days"},
+{no:96,name:"Tennis Elbow",w1:"Ruta 30 - 2 drops 2x daily, 7 days",w2:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w3:"Ruta + Bryonia 30 - 2 drops 2x daily, 7 days"},
+{no:97,name:"Heel Pain / Spur",w1:"Calc Fluor 6X - 4 tabs 2x daily, 7 days",w2:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w3:"Calc Fluor + Ledum 30 - 2 drops 2x daily, 7 days"},
+{no:98,name:"Ankle Sprain",w1:"Arnica 30 - 2 drops 3x daily, 7 days",w2:"Ruta 30 - 2 drops 2x daily, 7 days",w3:"Arnica + Rhus Tox 30 - 2 drops 2x daily, 7 days"},
+{no:99,name:"Muscle Cramps",w1:"Mag Phos 6X - 4 tabs 2x daily, 7 days",w2:"Cuprum Met 30 - 2 drops 2x daily, 7 days",w3:"Mag Phos + Calc Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:100,name:"Fibromyalgia",w1:"Arnica 30 - 2 drops 2x daily, 7 days",w2:"Rhus Tox 30 - 2 drops 2x daily, 7 days",w3:"Arnica + Cimicifuga 30 - 2 drops 2x daily, 7 days"},
+{no:101,name:"Sexual Weakness Male",w1:"Agnus Castus Q - 10 drops 2x daily, 7 days",w2:"Selenium 30 - 2 drops 2x daily, 7 days",w3:"Agnus Castus + Damiana Q - 10 drops 2x daily, 7 days"},
+{no:102,name:"Premature Ejaculation",w1:"Titanium 30 - 2 drops 2x daily, 7 days",w2:"Selenium 30 - 2 drops 2x daily, 7 days",w3:"Titanium + Caladium 30 - 2 drops 2x daily, 7 days"},
+{no:103,name:"Nightfall",w1:"Acid Phos 30 - 2 drops 2x daily, 7 days",w2:"Selenium 30 - 2 drops 2x daily, 7 days",w3:"Acid Phos + Nux Vomica 30 - 2 drops 2x daily, 7 days"},
+{no:104,name:"Low Libido Female",w1:"Sepia 30 - 2 drops 1x daily, 7 days",w2:"Agnus Castus Q - 10 drops 2x daily, 7 days",w3:"Sepia + Onosmodium 30 - 2 drops 1x daily, 7 days"},
+{no:105,name:"White Discharge Male",w1:"Selenium 30 - 2 drops 2x daily, 7 days",w2:"Acid Phos 30 - 2 drops 2x daily, 7 days",w3:"Selenium + Staphysagria 30 - 2 drops 2x daily, 7 days"},
+{no:106,name:"Spermatorrhea",w1:"Staphysagria 30 - 2 drops 2x daily, 7 days",w2:"Selenium 30 - 2 drops 2x daily, 7 days",w3:"Staphysagria + Acid Phos 30 - 2 drops 2x daily, 7 days"},
+{no:107,name:"Hydrocele",w1:"Rhododendron 30 - 2 drops 2x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Rhododendron + Calc Fluor 6X - 4 tabs 2x daily, 7 days"},
+{no:108,name:"Varicocele",w1:"Hamamelis Q - 10 drops 2x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Hamamelis + Calc Fluor 6X - 4 tabs 2x daily, 7 days"},
+{no:109,name:"Fibroid Uterus",w1:"Fraxinus Q - 10 drops 2x daily, 7 days",w2:"Calc Fluor 6X - 4 tabs 2x daily, 7 days",w3:"Fraxinus + Thuja 30 - 2 drops 2x daily, 7 days"},
+{no:110,name:"Ovarian Cyst",w1:"Apis Mel 30 - 2 drops 2x daily, 7 days",w2:"Oophorinum 30 - 2 drops 1x daily, 7 days",w3:"Apis + Thuja 30 - 2 drops 2x daily, 7 days"},
+{no:111,name:"Breast Pain / Fibroadenoma",w1:"Phytolacca 30 - 2 drops 2x daily, 7 days",w2:"Conium 30 - 2 drops 2x daily, 7 days",w3:"Phytolacca + Calc Fluor 6X - 4 tabs 2x daily, 7 days"},
+{no:112,name:"Heavy Periods",w1:"Sabina 30 - 2 drops 2x daily, 7 days",w2:"Trillium Q - 10 drops 2x daily, 7 days",w3:"Sabina + China 30 - 2 drops 2x daily, 7 days"},
+{no:113,name:"Painful Periods",w1:"Mag Phos 6X - 4 tabs 2x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Mag Phos + Chamomilla 30 - 2 drops 2x daily, 7 days"},
+{no:114,name:"Missed Periods",w1:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w2:"Sepia 30 - 2 drops 1x daily, 7 days",w3:"Pulsatilla + Senecio Q - 10 drops 2x daily, 7 days"},
+{no:115,name:"Pregnancy Nausea",w1:"Ipecac 30 - 2 drops 2x daily, 7 days",w2:"Sepia 30 - 2 drops 1x daily, 7 days",w3:"Ipecac + Colchicum 30 - 2 drops 2x daily, 7 days"},
+{no:116,name:"Lactation Low Milk",w1:"Ricinus Q - 10 drops 2x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Ricinus + Calc Phos 6X - 4 tabs 2x daily, 7 days"},
+{no:117,name:"Hormonal Imbalance",w1:"Sepia 30 - 2 drops 1x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Sepia + Folliculinum 30 - 2 drops 1x daily, 7 days"},
+{no:118,name:"Excessive Sweating",w1:"Silicea 30 - 2 drops 2x daily, 7 days",w2:"Calc Carb 30 - 2 drops 1x daily, 7 days",w3:"Silicea + Jaborandi Q - 10 drops 2x daily, 7 days"},
+{no:119,name:"Bad Breath",w1:"Merc Sol 30 - 2 drops 2x daily, 7 days",w2:"Carbo Veg 30 - 2 drops 2x daily, 7 days",w3:"Merc Sol + Kreosotum 30 - 2 drops 1x daily, 7 days"},
+{no:120,name:"Acid Reflux",w1:"Robinia 30 - 2 drops 2x daily, 7 days",w2:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w3:"Robinia + Carbo Veg 30 - 2 drops 2x daily, 7 days"},
+{no:121,name:"Bloating / Gas",w1:"Carbo Veg 30 - 2 drops 2x daily, 7 days",w2:"Lycopodium 30 - 2 drops 2x daily, 7 days",w3:"Carbo Veg + China 30 - 2 drops 2x daily, 7 days"},
+{no:122,name:"Nausea / Vomiting",w1:"Ipecac 30 - 2 drops 3x daily, 7 days",w2:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w3:"Ipecac + Arsenic Album 30 - 2 drops 2x daily, 7 days"},
+{no:123,name:"Loss of Appetite",w1:"Alfalfa Q - 10 drops 2x daily, 7 days",w2:"China 30 - 2 drops 2x daily, 7 days",w3:"Alfalfa + Gentiana Q - 10 drops 2x daily, 7 days"},
+{no:124,name:"Food Poisoning",w1:"Arsenic Album 30 - 2 drops 3x daily, 7 days",w2:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w3:"Arsenic + Veratrum Album 30 - 2 drops 2x daily, 7 days"},
+{no:125,name:"Hiccups",w1:"Cyclamen 30 - 2 drops 2x daily, 7 days",w2:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w3:"Cyclamen + Teucrium 30 - 2 drops 2x daily, 7 days"},
+{no:126,name:"Indigestion",w1:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Nux Vomica + Carbo Veg 30 - 2 drops 2x daily, 7 days"},
+{no:127,name:"Dysentery",w1:"Merc Cor 30 - 2 drops 2x daily, 7 days",w2:"Aloe Socotrina 30 - 2 drops 2x daily, 7 days",w3:"Merc Cor + Colocynth 30 - 2 drops 2x daily, 7 days"},
+{no:128,name:"Worms Adult",w1:"Cina 30 - 2 drops 2x daily, 7 days",w2:"Santoninum 30 - 2 drops 2x daily, 7 days",w3:"Cina + Teucrium 30 - 2 drops 2x daily, 7 days"},
+{no:129,name:"Allergic Cough",w1:"Arsenic Album 30 - 2 drops 2x daily, 7 days",w2:"Sambucus Q - 10 drops 2x daily, 7 days",w3:"Arsenic + Blatta Q - 10 drops 2x daily, 7 days"},
+{no:130,name:"Whooping Cough",w1:"Drosera 30 - 2 drops 2x daily, 7 days",w2:"Pertussinum 30 - 2 drops 1x daily, 7 days",w3:"Drosera + Antim Tart 30 - 2 drops 2x daily, 7 days"},
+{no:131,name:"Sore Throat",w1:"Belladonna 30 - 2 drops 3x daily, 7 days",w2:"Phytolacca 30 - 2 drops 2x daily, 7 days",w3:"Belladonna + Hepar Sulph 30 - 2 drops 2x daily, 7 days"},
+{no:132,name:"Voice Hoarseness",w1:"Causticum 30 - 2 drops 2x daily, 7 days",w2:"Phosphorus 30 - 2 drops 1x daily, 7 days",w3:"Causticum + Arum Triphyllum 30 - 2 drops 2x daily, 7 days"},
+{no:133,name:"Allergic Rhinitis",w1:"Sabadilla 30 - 2 drops 2x daily, 7 days",w2:"Allium Cepa 30 - 2 drops 2x daily, 7 days",w3:"Sabadilla + Arsenic Album 30 - 2 drops 2x daily, 7 days"},
+{no:134,name:"Nasal Polyp",w1:"Teucrium 30 - 2 drops 2x daily, 7 days",w2:"Calc Carb 30 - 2 drops 1x daily, 7 days",w3:"Teucrium + Sanguinaria Nit 30 - 2 drops 2x daily, 7 days"},
+{no:135,name:"Tinnitus / Ear Ringing",w1:"China 30 - 2 drops 2x daily, 7 days",w2:"Chininum Sulph 30 - 2 drops 2x daily, 7 days",w3:"China + Calc Carb 30 - 2 drops 1x daily, 7 days"},
+{no:136,name:"Glaucoma Support",w1:"Phosphorus 30 - 2 drops 1x daily, 7 days",w2:"Spigelia 30 - 2 drops 2x daily, 7 days",w3:"Phosphorus + Osmium 30 - 2 drops 2x daily, 7 days"},
+{no:137,name:"Cataract Early",w1:"Calc Fluor 6X - 4 tabs 2x daily, 7 days",w2:"Silicea 30 - 2 drops 2x daily, 7 days",w3:"Calc Fluor + Cineraria Q - 10 drops 2x daily, 7 days"},
+{no:138,name:"Dry Eyes",w1:"Euphrasia 30 - 2 drops 2x daily, 7 days",w2:"Alumina 30 - 2 drops 2x daily, 7 days",w3:"Euphrasia + Natrum Mur 30 - 2 drops 2x daily, 7 days"},
+{no:139,name:"Stye",w1:"Staphysagria 30 - 2 drops 2x daily, 7 days",w2:"Pulsatilla 30 - 2 drops 2x daily, 7 days",w3:"Staphysagria + Hepar Sulph 30 - 2 drops 2x daily, 7 days"},
+{no:140,name:"Dandruff",w1:"Sulphur 30 - 2 drops 1x daily, 7 days",w2:"Arnica Q - 10 drops 2x daily, 7 days",w3:"Sulphur + Kali Sulph 6X - 4 tabs 2x daily, 7 days"},
+{no:141,name:"Premature Greying",w1:"Lycopodium 30 - 2 drops 2x daily, 7 days",w2:"Acid Phos 30 - 2 drops 2x daily, 7 days",w3:"Lycopodium + Wiesbaden 30 - 2 drops 1x daily, 7 days"},
+{no:142,name:"Baldness",w1:"Acid Fluor 30 - 2 drops 2x daily, 7 days",w2:"Wiesbaden 30 - 2 drops 1x daily, 7 days",w3:"Acid Fluor + Arnica Q - 10 drops 2x daily, 7 days"},
+{no:143,name:"Nail Fungus",w1:"Graphites 30 - 2 drops 2x daily, 7 days",w2:"Silicea 30 - 2 drops 2x daily, 7 days",w3:"Graphites + Antim Crud 30 - 2 drops 2x daily, 7 days"},
+{no:144,name:"Sweaty Palms",w1:"Silicea 30 - 2 drops 2x daily, 7 days",w2:"Calc Carb 30 - 2 drops 1x daily, 7 days",w3:"Silicea + Jaborandi Q - 10 drops 2x daily, 7 days"},
+{no:145,name:"Excessive Thirst",w1:"Natrum Mur 30 - 2 drops 2x daily, 7 days",w2:"Bryonia 30 - 2 drops 2x daily, 7 days",w3:"Natrum Mur + Phosphorus 30 - 2 drops 1x daily, 7 days"},
+{no:146,name:"Sugar Craving",w1:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w2:"Sulphur 30 - 2 drops 1x daily, 7 days",w3:"Argentum Nit + Lycopodium 30 - 2 drops 2x daily, 7 days"},
+{no:147,name:"Smoking Craving",w1:"Caladium 30 - 2 drops 2x daily, 7 days",w2:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w3:"Caladium + Tabacum 30 - 2 drops 2x daily, 7 days"},
+{no:148,name:"Alcohol Craving",w1:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w2:"Quercus Q - 10 drops 2x daily, 7 days",w3:"Nux Vomica + Avena Sativa Q - 10 drops 2x daily, 7 days"},
+{no:149,name:"Anger / Irritability",w1:"Chamomilla 30 - 2 drops 2x daily, 7 days",w2:"Nux Vomica 30 - 2 drops 2x daily, 7 days",w3:"Chamomilla + Staphysagria 30 - 2 drops 2x daily, 7 days"},
+{no:150,name:"Fear / Phobia",w1:"Aconite 30 - 2 drops 2x daily, 7 days",w2:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w3:"Aconite + Gelsemium 30 - 2 drops 2x daily, 7 days"},
+{no:151,name:"OCD Thoughts",w1:"Arsenic Album 30 - 2 drops 2x daily, 7 days",w2:"Syphilinum 30 - 2 drops 1x daily, 7 days",w3:"Arsenic + Ignatia 30 - 2 drops 2x daily, 7 days"},
+{no:152,name:"Exam Fear",w1:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w2:"Gelsemium 30 - 2 drops 2x daily, 7 days",w3:"Argentum Nit + Anacardium 30 - 2 drops 2x daily, 7 days"},
+{no:153,name:"Grief / Sadness",w1:"Ignatia 30 - 2 drops 2x daily, 7 days",w2:"Natrum Mur 30 - 2 drops 2x daily, 7 days",w3:"Ignatia + Aurum Met 30 - 2 drops 1x daily, 7 days"},
+{no:154,name:"Jealousy",w1:"Lachesis 30 - 2 drops 2x daily, 7 days",w2:"Hyoscyamus 30 - 2 drops 2x daily, 7 days",w3:"Lachesis + Apis Mel 30 - 2 drops 2x daily, 7 days"},
+{no:155,name:"Laziness / Dullness",w1:"Calc Carb 30 - 2 drops 1x daily, 7 days",w2:"Baryta Carb 30 - 2 drops 2x daily, 7 days",w3:"Calc Carb + Sulphur 30 - 2 drops 1x daily, 7 days"},
+{no:156,name:"Overthinking",w1:"Kali Phos 6X - 4 tabs 2x daily, 7 days",w2:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w3:"Kali Phos + Ignatia 30 - 2 drops 2x daily, 7 days"},
+{no:157,name:"Low Confidence",w1:"Lycopodium 30 - 2 drops 2x daily, 7 days",w2:"Anacardium 30 - 2 drops 2x daily, 7 days",w3:"Lycopodium + Silicea 30 - 2 drops 2x daily, 7 days"},
+{no:158,name:"Stage Fear",w1:"Gelsemium 30 - 2 drops 2x daily, 7 days",w2:"Argentum Nit 30 - 2 drops 2x daily, 7 days",w3:"Gelsemium + Silicea 30 - 2 drops 2x daily, 7 days"},
+{no:159,name:"General Tonic",w1:"Alfalfa Q - 10 drops 2x daily, 7 days",w2:"Avena Sativa Q - 10 drops 2x daily, 7 days",w3:"Alfalfa + China 30 - 2 drops 2x daily, 7 days"},
+{no:160,name:"Immunity Booster",w1:"Echinacea Q - 10 drops 2x daily, 7 days",w2:"Arsenic Album 30 - 2 drops 2x daily, 7 days",w3:"Echinacea Q + Tuberculinum 30 - 2 drops 1x daily, 7 days"}
 ];
 let saved=JSON.parse(localStorage.getItem('resetDiseases')||'[]');
 let all=base.concat(saved);
